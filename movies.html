@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>الأفلام التقنية | أهلية أكاديمي</title>
   <script>
     /* page guard: only signed-in users can open this page */
@@ -13,7 +13,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#050a2a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="أهلية">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" href="icons/icon-192.png">
   <script src="theme.js"></script>
+  <script src="config.js"></script>
+  <script src="backend.js"></script>
   <script src="store.js"></script>
 </head>
 <body data-page="movies">
@@ -74,5 +83,6 @@
   <script src="page.js"></script>
   <script src="data.js"></script>
   <script src="movies.js"></script>
+  <script src="mobile.js"></script>
 </body>
 </html>

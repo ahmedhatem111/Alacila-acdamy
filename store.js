@@ -24,6 +24,10 @@
 
   /* طلب للسيرفر (بيضيف الهيدر المطلوب للحماية من CSRF) */
   async function api(method, url, body) {
+    if (window.AhliaBackend) {   // وضع الاستضافة الثابتة (GitHub Pages) -> Supabase
+      try { return await window.AhliaBackend.request(method, url, body); }
+      catch (e) { if (e.status === 401 && !/^\/api\/(login|register)/.test(url)) expired(); throw e; }
+    }
     const opt = { method, credentials: "same-origin", headers: { "X-Requested-With": "ahlia" } };
     if (body !== undefined) { opt.headers["Content-Type"] = "application/json"; opt.body = JSON.stringify(body); }
     let res;
@@ -44,7 +48,9 @@
     state = { uid: p.user.id, enrolled: p.state.enrolled || [], done: p.state.done || {} };
     persist();
   }
-  function clearLocal() { drop(KEY_USER); drop(KEY_STATE); drop("ahlia_accounts"); state = { uid: null, enrolled: [], done: {} }; }
+  function clearLocal() {
+    try { if (window.caches) caches.keys().then((ks) => ks.forEach((k) => caches.delete(k))); } catch (e) {}
+    drop("ahlia_sb"); drop(KEY_USER); drop(KEY_STATE); drop("ahlia_accounts"); state = { uid: null, enrolled: [], done: {} }; }
 
   /* الجلسة انتهت على السيرفر */
   function expired() {

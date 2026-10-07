@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>الكورس | أهلية أكاديمي</title>
   <script>
     /* page guard: only signed-in users can open this page */
@@ -12,7 +12,16 @@
   </script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#050a2a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="أهلية">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" href="icons/icon-192.png">
   <script src="theme.js"></script>
+  <script src="config.js"></script>
+  <script src="backend.js"></script>
   <script src="store.js"></script>
 <style>
 #cp{
@@ -170,7 +179,7 @@ const LEC = COURSE.sections.flatMap((s,si)=>s.l.map(l=>({...l,si})));
 const KEY = `progress:${COURSE.id}:${USER.id}`;
 let P = {cur:0, pos:{}, max:{}, w:{}, done:{}, quiz:null, name:USER.name};
 try{ P = {...P, ...JSON.parse(localStorage.getItem(KEY)||"{}")}; }catch(e){}
-if(API_URL) fetch(`${API_URL}?course=${COURSE.id}&user=${USER.id}`).then(r=>r.json()).then(d=>{P={...P,...d};render();loadCur()}).catch(()=>{});
+if(API_URL) AhliaStore.api("GET",`${API_URL}?course=${encodeURIComponent(COURSE.id)}`).then(d=>{P={...P,...d};render();loadCur()}).catch(()=>{});
 
 const k = i => i+"-"+LEC[i].id;               // مفتاح مميز لكل محاضرة
 const isDone = i => !!P.done[k(i)];
@@ -181,7 +190,7 @@ const fmt = s => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")
 
 function save(){
   try{ localStorage.setItem(KEY, JSON.stringify(P)); }catch(e){}
-  if(API_URL) fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json","X-Requested-With":"ahlia"},body:JSON.stringify({course:COURSE.id,progress:P}),keepalive:true}).catch(()=>{});
+  if(API_URL) AhliaStore.api("POST",API_URL,{course:COURSE.id,progress:P}).catch(()=>{});
 }
 
 /* ---------- واجهة ---------- */
@@ -326,5 +335,6 @@ if(location.protocol==="file:") toast("⚠️ الصفحة مفتوحة كملف
 </script>
 <script src="script.js"></script>
 <script src="page.js"></script>
+  <script src="mobile.js"></script>
 </body>
 </html>

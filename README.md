@@ -1,69 +1,53 @@
-# أهلية أكاديمي — الموقع + السيرفر + قاعدة البيانات
+# أهلية أكاديمي — نسخة GitHub Pages + Supabase
 
-الموقع بقى مشروع Flask فيه قاعدة بيانات SQLite. الطلاب يسجّلوا حساب ويدخلوا، وبياناتهم محفوظة على السيرفر.
+الموقع ده بيشتغل على **GitHub Pages** (استضافة ملفات ثابتة) والحسابات والبيانات محفوظة في **Supabase** (قاعدة بيانات مجانية).
+GitHub Pages لوحده مايقدرش يحفظ حسابات، عشان كده التسجيل ماكانش بيشتغل. الخطوات دي بتحل ده (حوالي 10 دقايق).
 
-## الهيكل
+## 1) أنشئ مشروع Supabase
+1. ادخل على https://supabase.com واعمل حساب، ثم **New project** (الخطة المجانية كفاية).
+2. اختار اسم وباسورد لقاعدة البيانات (احفظه) وأقرب منطقة، وانتظر دقيقة لحد ما يجهز.
+
+## 2) أنشئ الجداول
+1. من القائمة الجانبية: **SQL Editor** ثم **New query**.
+2. افتح ملف `supabase.sql` من هنا، انسخه كله والصقه، واضغط **Run**.
+3. لازم يظهر `Success`. لو ظهر خطأ ابعتلي نصه.
+
+## 3) إعدادات الحسابات
+من **Authentication → Sign In / Providers → Email**:
+- **Confirm email**: اقفله لو عايز الطالب يدخل فورًا بعد التسجيل. لو سيبته مفتوح الطالب لازم يضغط رابط في إيميله، ورسائل Supabase المجانية محدودة العدد في الساعة فممكن تتأخر على ناس كتير.
+- بعدها من **Authentication → URL Configuration** حط في **Site URL** رابط موقعك على GitHub Pages (مثال `https://username.github.io/repo/`).
+
+## 4) اربط الموقع بقاعدة البيانات
+1. من **Project Settings → API** انسخ:
+   - **Project URL**
+   - مفتاح **anon public**
+2. افتح ملف `config.js` وحطهم:
+```js
+window.AHLIA_CONFIG = {
+  supabaseUrl: "https://xxxxxxxx.supabase.co",
+  supabaseKey: "eyJhbGciOi...",
+};
 ```
-app.py            السيرفر (الحسابات + الـ API + حماية الصفحات والملفات)
-manage.py         أوامر إدارة (عدد الطلاب، تغيير باسورد، تصدير CSV ...)
-public/           صفحات الموقع (HTML/JS/CSS + ملفات PDF)
-instance/         قاعدة البيانات ahlia.db + المفتاح السري (بيتعمل تلقائي — لا ترفعه على GitHub)
-requirements.txt
-```
+مفتاح anon مصمّم يكون ظاهر في الموقع. الحماية الفعلية بسياسات RLS اللي في `supabase.sql`، وبتخلّي كل طالب يقرأ ويعدّل بياناته هو بس.
+**ماتحطش مفتاح `service_role` في الموقع أبدًا.**
 
-## التشغيل على جهازك
-```bash
-pip install -r requirements.txt
-python app.py          # افتح http://127.0.0.1:5000
-```
+## 5) ارفع على GitHub
+ارفع **محتويات** المجلد ده (مش المجلد نفسه) في جذر الريبو، ثم **Settings → Pages → Deploy from a branch → main / (root)**.
+بعد دقيقة الموقع يشتغل. جرّب تعمل حساب من التلفون.
 
-## الرفع على سيرفر (مهم)
-الموقع محتاج استضافة بتشغّل **Python**. مش هيشتغل على استضافة HTML بس أو PHP فقط.
-خيارات مناسبة: PythonAnywhere، VPS (DigitalOcean/Hetzner...)، أو أي استضافة فيها "Setup Python App".
+## تثبيت الموقع كتطبيق على التلفون
+- أندرويد (Chrome): هيظهر زر «ثبّت التطبيق» في صفحة الترحيب، أو من قائمة المتصفح ← تثبيت التطبيق.
+- آيفون (Safari): زر المشاركة ← إضافة إلى الشاشة الرئيسية.
 
-**تحذير:** قاعدة البيانات ملف على القرص (`instance/ahlia.db`). لازم الاستضافة تحفظ الملفات بشكل دائم.
-خدمات زي Render/Railway/Heroku المجانية بتمسح الملفات عند كل إعادة تشغيل — استخدم Persistent Disk
-(ومرّر مساره بالمتغير `DATABASE=/data/ahlia.db`) أو VPS.
+## متابعة الطلاب
+في Supabase: **Authentication → Users** فيها كل الحسابات، و**Table Editor → profiles** فيه الاسم والسنة/التخصص.
+لو طالب نسي الباسورد: من **Authentication → Users** اختاره وغيّر الباسورد أو ابعتله رابط استعادة.
 
-### على VPS (Ubuntu)
-```bash
-pip install -r requirements.txt
-HTTPS=1 TRUST_PROXY=1 gunicorn -w 3 -b 127.0.0.1:8000 app:app
-```
-وبعدها nginx يعمل proxy على المنفذ 8000 مع شهادة HTTPS (certbot).
-
-### على PythonAnywhere
-ارفع المجلد، وأنشئ Web app (Flask)، وفي ملف WSGI اكتب:
-```python
-import sys; sys.path.insert(0, "/home/USERNAME/ahlia")
-from app import app as application
-```
-
-## متغيرات البيئة (اختيارية)
-| المتغير | الاستخدام |
-|---|---|
-| `HTTPS=1` | فعّله أول ما الموقع يشتغل على https (يخلّي الكوكي Secure) |
-| `TRUST_PROXY=1` | لو الموقع وراء nginx أو خدمة استضافة بتعمل proxy |
-| `ALLOWED_EMAIL_DOMAINS` | مثال `ahlia.edu.eg` — يقصر التسجيل على الإيميل الجامعي |
-| `SECRET_KEY` | مفتاح الجلسات (لو ما اتحددش بيتولّد في `instance/secret.key`) |
-| `DATABASE` | مسار ملف قاعدة البيانات |
-
-## إدارة الحسابات
-```bash
-python manage.py stats
-python manage.py list
-python manage.py export users.csv
-python manage.py reset-password student@mail.com
-python manage.py delete student@mail.com
-```
-
-## النسخ الاحتياطي
-انسخ ملف `instance/ahlia.db` بشكل دوري (يفضّل والسيرفر شغال عن طريق `sqlite3 ahlia.db ".backup backup.db"`).
-
-## صلاحيات الوصول
-كل طالب يفتح سنته أو تخصصه بس (صفحات وملفات). لتغيير القاعدة عدّل الدالة `access_for` في `app.py`.
-
-## ما هو غير موجود حاليًا
-- **استعادة كلمة المرور بالإيميل:** محتاجة سيرفر إيميل. حاليًا الإدارة تغيّرها بـ `manage.py reset-password`.
-- **التحقق من ملكية الإيميل:** التسجيل مفتوح لأي إيميل صيغته صحيحة؛ استخدم `ALLOWED_EMAIL_DOMAINS` لو عايز تقصره على الجامعة.
-- **الشهادة** بتتحسب في المتصفح من تقدّم الطالب وبتتعرض للطباعة؛ مش وثيقة موثّقة من السيرفر.
+## لازم تعرف
+- **ملفات الـ PDF والصفحات علنية.** GitHub Pages ما بيقدرش يقفل ملفات. قفل الصفحات حسب السنة/التخصص بيمنع الطالب من الواجهة، لكن اللي يعرف رابط ملف PDF يقدر يفتحه. لو المحتوى لازم يفضل خاص فعلًا، محتاج استضافة بسيرفر (نسخة Flask اللي بعتهالك قبل كده) أو Supabase Storage.
+- **أي حد يقدر يسجل** بأي إيميل. لقصر التسجيل على إيميل الجامعة بشكل مضمون، ضيف الشرط ده في دالة `handle_new_user` في `supabase.sql` بعد سطر `begin` وشغّلها تاني:
+  ```sql
+  if new.email not like '%@your-university.edu.eg' then raise exception 'التسجيل بالبريد الجامعي فقط'; end if;
+  ```
+- المشروع المجاني في Supabase بيتوقف لو ما استُخدمش أسبوع، وبتفعّله من لوحة التحكم.
+- الشهادة بتتحسب في المتصفح وبتتطبع، مش وثيقة موثّقة.

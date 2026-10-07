@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>ابحث عن تيم | أهلية أكاديمي</title>
   <script>
     /* page guard: only signed-in users can open this page */
@@ -12,7 +12,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#050a2a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="أهلية">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" href="icons/icon-192.png">
   <script src="theme.js"></script>
+  <script src="config.js"></script>
+  <script src="backend.js"></script>
   <script src="store.js"></script>
   <style>
 #tp{--panel:#0a1330;--panel2:#0d1a3d;--line:#1b2a57;--tx:#e8eeff;--mut:#8b9acb;--pri:#2f7bff;--ok:#22c55e;--warn:#f59e0b;
@@ -175,5 +184,6 @@ api("GET","/api/teams").then(l=>{posts=l;render()}).catch(x=>{render();toast(x.m
 </script>
 <script src="script.js"></script>
 <script src="page.js"></script>
+  <script src="mobile.js"></script>
 </body>
 </html>

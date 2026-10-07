@@ -94,7 +94,7 @@
       say(form, okMsg, "ok");
       finish(payload);
     } catch (e) {
-      say(form, e.message, "bad");
+      say(form, e.message, e.status === 202 ? "ok" : "bad");
       btn.disabled = false;
     }
   }
